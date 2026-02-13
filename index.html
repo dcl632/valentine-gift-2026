@@ -267,7 +267,7 @@
 
         /* ========== SECTION 1: HEART CANVAS ========== */
         #heartSection {
-            background: radial-gradient(ellipse at center, #12101e 0%, var(--darker) 70%);
+            background: radial-gradient(ellipse at 50% 45%, #1a0520 0%, #0a0510 40%, var(--darker) 70%);
         }
 
         #canvas {
@@ -599,7 +599,7 @@
     <!-- ====== PHASE 0: LOCK SCREEN ====== -->
     <div id="lockScreen">
         <div class="lock-time" id="lockTime">21:14</div>
-        <div class="lock-date" id="lockDate">Thứ Sáu, 14 tháng 2</div>
+        <div class="lock-date" id="lockDate">星期六, 2月14日</div>
         <div class="gift-box-wrapper" id="giftBoxWrapper">
             <div class="gift-box" id="giftBox">🎁</div>
             <div class="hold-text">長按開啟禮物 💝</div>
@@ -652,22 +652,21 @@
             <div class="gallery-title" id="galleryTitle">Our Memories 💕</div>
             <div class="gallery-subtitle" id="gallerySubtitle">每一刻都值得珍藏</div>
             <div class="photo-grid" id="photoGrid">
-                <!-- ★ REPLACE src with your actual photo URLs ★ -->
                 <div class="photo-card">
-                    <img src="https://via.placeholder.com/300/ff6b9d/ffffff?text=Us+1" alt="Memory 1">
-                    <div class="caption">第一次見面 ✨</div>
+                    <img src="photos/photo1.jpg" alt="Memory 1">
+                    <div class="caption">約會夜 🎬</div>
                 </div>
                 <div class="photo-card">
-                    <img src="https://via.placeholder.com/300/c44569/ffffff?text=Us+2" alt="Memory 2">
-                    <div class="caption">那天的笑容 💫</div>
+                    <img src="photos/photo2.jpg" alt="Memory 2">
+                    <div class="caption">偷偷親一個 💋</div>
                 </div>
                 <div class="photo-card">
-                    <img src="https://via.placeholder.com/300/f8b500/ffffff?text=Us+3" alt="Memory 3">
-                    <div class="caption">在一起的時光 🌸</div>
+                    <img src="photos/photo3.jpg" alt="Memory 3">
+                    <div class="caption">最喜歡的笑容 😊</div>
                 </div>
                 <div class="photo-card">
-                    <img src="https://via.placeholder.com/300/a29bfe/ffffff?text=Us+4" alt="Memory 4">
-                    <div class="caption">永遠記得你 💖</div>
+                    <img src="photos/photo4.jpg" alt="Memory 4">
+                    <div class="caption">吃貨日常 🍽️</div>
                 </div>
             </div>
         </section>
@@ -679,7 +678,7 @@
                     <div class="chat-avatar">💻</div>
                     <div>
                         <div class="chat-name">Code of Love</div>
-                        <div class="chat-status">Đang hoạt động</div>
+                        <div class="chat-status">線上</div>
                     </div>
                 </div>
                 <div id="chatMessages"></div>
@@ -938,9 +937,11 @@
             observer.observe($('finalSection'));
         }
 
-        // ===== PARTICLE SYSTEM =====
+        // ===== DRAMATIC 3D HEART PARTICLE SYSTEM =====
         let particles = [];
-        let mouse = { x: -9999, y: -9999 };
+        let bgStars = [];
+        let sparkles = [];
+        let animStartTime = 0;
 
         function resizeCanvas() {
             const section = $('heartSection');
@@ -949,99 +950,237 @@
         }
         window.addEventListener('resize', () => { resizeCanvas(); if (particles.length) initParticles(); });
 
-        canvas.addEventListener('mousemove', e => {
-            const r = canvas.getBoundingClientRect();
-            mouse.x = e.clientX - r.left;
-            mouse.y = e.clientY - r.top;
-        });
-        canvas.addEventListener('mouseleave', () => { mouse.x = mouse.y = -9999; });
-        canvas.addEventListener('touchmove', e => {
-            e.preventDefault();
-            const r = canvas.getBoundingClientRect();
-            mouse.x = e.touches[0].clientX - r.left;
-            mouse.y = e.touches[0].clientY - r.top;
-        }, { passive: false });
-        canvas.addEventListener('touchend', () => { mouse.x = mouse.y = -9999; });
-
-        class Particle {
-            constructor(x, y) {
-                this.baseX = x;
-                this.baseY = y;
-                this.x = x + (Math.random() - 0.5) * 300;
-                this.y = y + (Math.random() - 0.5) * 300;
-                this.vx = 0;
-                this.vy = 0;
-                this.size = Math.random() * 3 + 2;
-                
-                const hue = 320 + Math.random() * 50;
-                const lit = 55 + Math.random() * 25;
-                this.col = `hsl(${hue}, 100%, ${lit}%)`;
-            }
-
-            update(time) {
-                // Smooth spring physics to base position
-                const dx = this.baseX - this.x;
-                const dy = this.baseY - this.y;
-                
-                this.vx += dx * 0.02;
-                this.vy += dy * 0.02;
-                this.vx *= 0.9;
-                this.vy *= 0.9;
-                
-                this.x += this.vx;
-                this.y += this.vy;
-                
-                // Gentle wave motion
-                this.x += Math.sin(time * 0.001 + this.baseY * 0.01) * 0.5;
-                this.y += Math.cos(time * 0.0015 + this.baseX * 0.01) * 0.5;
-            }
-
-            draw(scale) {
-                ctx.globalAlpha = 0.85;
-                ctx.fillStyle = this.col;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size * scale, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.globalAlpha = 1;
-            }
-        }
+        // Heart parametric equation
+        function heartX(t) { return 16 * Math.pow(Math.sin(t), 3); }
+        function heartY(t) { return -(13*Math.cos(t) - 5*Math.cos(2*t) - 2*Math.cos(3*t) - Math.cos(4*t)); }
 
         function initParticles() {
             particles = [];
-            const cx = canvas.width / 2;
-            const cy = canvas.height * 0.42;
-            const scale = Math.min(canvas.width, canvas.height) * 0.06;
-            
-            // Heart shape formula (2D parametric)
-            for (let i = 0; i < 400; i++) {
-                const t = (i / 400) * Math.PI * 2;
-                const x = 16 * Math.pow(Math.sin(t), 3);
-                const y = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
-                particles.push(new Particle(cx + x * scale, cy + y * scale));
+            bgStars = [];
+            sparkles = [];
+            animStartTime = Date.now();
+
+            const heartSize = Math.min(canvas.width, canvas.height) * 0.38;
+            const scale = heartSize / 32;
+
+            // 3D heart particles: multiple depth layers
+            const layers = 8;
+            const outlinePerLayer = 90;
+
+            for (let layer = 0; layer < layers; layer++) {
+                const zNorm = (layer / (layers - 1)) * 2 - 1;
+                const zScale = Math.sqrt(Math.max(0, 1 - zNorm * zNorm));
+
+                // Outline
+                for (let i = 0; i < outlinePerLayer; i++) {
+                    const t = (i / outlinePerLayer) * Math.PI * 2;
+                    const hx = heartX(t) * scale * zScale;
+                    const hy = heartY(t) * scale * zScale;
+                    const hz = zNorm * heartSize * 0.2;
+
+                    const hue = 330 + Math.random() * 40;
+                    const lit = 55 + Math.random() * 30;
+                    particles.push({
+                        // Target position (heart shape)
+                        tx: hx, ty: hy, tz: hz,
+                        // Current position (random scatter for entrance)
+                        cx: (Math.random() - 0.5) * canvas.width * 1.5,
+                        cy: (Math.random() - 0.5) * canvas.height * 1.5,
+                        cz: (Math.random() - 0.5) * 600,
+                        size: Math.random() * 2.5 + 1.5,
+                        col: `hsl(${hue},100%,${lit}%)`,
+                        speed: 0.015 + Math.random() * 0.015,
+                        sparkTimer: Math.random() * 100
+                    });
+                }
+
+                // Fill interior
+                const fillCount = Math.floor(50 * zScale * zScale);
+                for (let i = 0; i < fillCount; i++) {
+                    const t = Math.random() * Math.PI * 2;
+                    const r = Math.random() * 0.75;
+                    const hx = heartX(t) * r * scale * zScale;
+                    const hy = heartY(t) * r * scale * zScale;
+                    const hz = zNorm * heartSize * 0.2;
+
+                    const hue = 330 + Math.random() * 40;
+                    const lit = 50 + Math.random() * 35;
+                    particles.push({
+                        tx: hx, ty: hy, tz: hz,
+                        cx: (Math.random() - 0.5) * canvas.width * 1.5,
+                        cy: (Math.random() - 0.5) * canvas.height * 1.5,
+                        cz: (Math.random() - 0.5) * 600,
+                        size: Math.random() * 2 + 1,
+                        col: `hsl(${hue},100%,${lit}%)`,
+                        speed: 0.015 + Math.random() * 0.015,
+                        sparkTimer: Math.random() * 100
+                    });
+                }
             }
-            
-            // Add inner particles for fullness
-            for (let i = 0; i < 200; i++) {
-                const t = Math.random() * Math.PI * 2;
-                const r = Math.random() * 0.7;
-                const x = 16 * Math.pow(Math.sin(t), 3) * r;
-                const y = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t)) * r;
-                particles.push(new Particle(cx + x * scale, cy + y * scale));
+
+            // Background ambient stars
+            for (let i = 0; i < 120; i++) {
+                bgStars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 1.5 + 0.5,
+                    twinkleSpeed: 0.01 + Math.random() * 0.03,
+                    twinkleOffset: Math.random() * Math.PI * 2,
+                    col: Math.random() > 0.7 ? '#ff9ec4' : '#ffffff'
+                });
             }
         }
 
-        let startTime = Date.now();
+        let rotAngle = 0;
         function animateParticles() {
+            const now = Date.now();
+            const elapsed = (now - animStartTime) / 1000; // seconds since start
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            const time = Date.now() - startTime;
-            const beat = 1 + Math.sin(time * 0.002) * 0.08;
-            
-            particles.forEach(p => {
-                p.update(time);
-                p.draw(beat);
-            });
 
+            const cx = canvas.width / 2;
+            const cy = canvas.height * 0.44;
+
+            // ---- BACKGROUND STARS ----
+            for (let i = 0; i < bgStars.length; i++) {
+                const s = bgStars[i];
+                const alpha = 0.3 + 0.4 * Math.sin(now * s.twinkleSpeed * 0.001 + s.twinkleOffset);
+                ctx.globalAlpha = alpha;
+                ctx.fillStyle = s.col;
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.size, 0, 6.283);
+                ctx.fill();
+            }
+
+            // ---- HEART GLOW (radial gradient behind heart) ----
+            const glowPulse = 1 + Math.sin(now * 0.003) * 0.15;
+            const glowRadius = Math.min(canvas.width, canvas.height) * 0.35 * glowPulse;
+            const glowGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, glowRadius);
+            glowGrad.addColorStop(0, 'rgba(255, 50, 100, 0.12)');
+            glowGrad.addColorStop(0.5, 'rgba(255, 50, 100, 0.05)');
+            glowGrad.addColorStop(1, 'rgba(255, 50, 100, 0)');
+            ctx.globalAlpha = 1;
+            ctx.fillStyle = glowGrad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // ---- ENTRANCE ANIMATION (particles fly to target) ----
+            // Phase: 0-2s gathering, 2s+ formed
+            const gatherProgress = Math.min(1, elapsed / 2.0);
+            const eased = 1 - Math.pow(1 - gatherProgress, 3); // ease-out cubic
+
+            // Move particles toward target
+            for (let i = 0; i < particles.length; i++) {
+                const p = particles[i];
+                p.cx += (p.tx - p.cx) * p.speed * (1 + eased * 3);
+                p.cy += (p.ty - p.cy) * p.speed * (1 + eased * 3);
+                p.cz += (p.tz - p.cz) * p.speed * (1 + eased * 3);
+            }
+
+            // ---- 3D ROTATION (only after mostly formed) ----
+            if (eased > 0.8) {
+                rotAngle += 0.008;
+            }
+
+            // ---- HEARTBEAT (dramatic pump after formed) ----
+            let beat = 1;
+            if (eased >= 1) {
+                // Realistic double-beat: lub-dub
+                const t = (now % 1200) / 1200;
+                if (t < 0.1) {
+                    beat = 1 + 0.12 * Math.sin(t / 0.1 * Math.PI);
+                } else if (t > 0.15 && t < 0.25) {
+                    beat = 1 + 0.08 * Math.sin((t - 0.15) / 0.1 * Math.PI);
+                } else {
+                    beat = 1;
+                }
+            }
+
+            const cosA = Math.cos(rotAngle);
+            const sinA = Math.sin(rotAngle);
+            const fov = 400;
+            const camDist = 250;
+
+            // ---- PROJECT ALL PARTICLES ----
+            const projected = [];
+            for (let i = 0; i < particles.length; i++) {
+                const p = particles[i];
+                const bx = p.cx * beat;
+                const by = p.cy * beat;
+                const bz = p.cz * beat;
+                // Y-axis rotation
+                const rx = bx * cosA - bz * sinA;
+                const rz = bx * sinA + bz * cosA;
+                // Perspective
+                const d = fov / (fov + camDist + rz);
+                projected.push({
+                    px: cx + rx * d,
+                    py: cy + by * d,
+                    sz: Math.max(0.5, p.size * d * beat),
+                    rz: rz,
+                    alpha: Math.max(0.2, Math.min(1, d * 1.3)) * Math.min(1, elapsed * 0.8),
+                    col: p.col
+                });
+            }
+
+            // Sort back-to-front
+            projected.sort((a, b) => a.rz - b.rz);
+
+            // ---- DRAW PARTICLES ----
+            for (let i = 0; i < projected.length; i++) {
+                const q = projected[i];
+                // Outer glow
+                ctx.globalAlpha = q.alpha * 0.2;
+                ctx.fillStyle = q.col;
+                ctx.beginPath();
+                ctx.arc(q.px, q.py, q.sz * 3, 0, 6.283);
+                ctx.fill();
+                // Main particle
+                ctx.globalAlpha = q.alpha;
+                ctx.beginPath();
+                ctx.arc(q.px, q.py, q.sz, 0, 6.283);
+                ctx.fill();
+                // Bright center
+                ctx.globalAlpha = q.alpha * 0.7;
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                ctx.arc(q.px, q.py, q.sz * 0.35, 0, 6.283);
+                ctx.fill();
+            }
+
+            // ---- FLOATING SPARKLES (emitted from heart) ----
+            if (eased >= 0.9 && Math.random() < 0.3) {
+                const t = Math.random() * Math.PI * 2;
+                const hx = heartX(t) * Math.min(canvas.width, canvas.height) * 0.38 / 32;
+                const hy = heartY(t) * Math.min(canvas.width, canvas.height) * 0.38 / 32;
+                sparkles.push({
+                    x: cx + hx * beat, y: cy + hy * beat,
+                    vx: (Math.random() - 0.5) * 1.5,
+                    vy: -Math.random() * 2 - 0.5,
+                    life: 1,
+                    decay: 0.008 + Math.random() * 0.015,
+                    size: Math.random() * 2 + 1
+                });
+            }
+
+            for (let i = sparkles.length - 1; i >= 0; i--) {
+                const sp = sparkles[i];
+                sp.x += sp.vx;
+                sp.y += sp.vy;
+                sp.life -= sp.decay;
+                if (sp.life <= 0) { sparkles.splice(i, 1); continue; }
+                ctx.globalAlpha = sp.life * 0.7;
+                ctx.fillStyle = '#ffb6c1';
+                ctx.beginPath();
+                ctx.arc(sp.x, sp.y, sp.size * sp.life, 0, 6.283);
+                ctx.fill();
+                // Sparkle white core
+                ctx.globalAlpha = sp.life * 0.5;
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                ctx.arc(sp.x, sp.y, sp.size * sp.life * 0.4, 0, 6.283);
+                ctx.fill();
+            }
+
+            ctx.globalAlpha = 1;
             requestAnimationFrame(animateParticles);
         }
 
