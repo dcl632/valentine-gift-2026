@@ -964,120 +964,82 @@
         canvas.addEventListener('touchend', () => { mouse.x = mouse.y = -9999; });
 
         class Particle {
-            constructor() {
-                this.x = (Math.random()-0.5) * canvas.width;
-                this.y = (Math.random()-0.5) * canvas.height;
-                this.z = (Math.random()-0.5) * 600;
+            constructor(x, y) {
+                this.baseX = x;
+                this.baseY = y;
+                this.x = x + (Math.random() - 0.5) * 300;
+                this.y = y + (Math.random() - 0.5) * 300;
+                this.vx = 0;
+                this.vy = 0;
+                this.size = Math.random() * 3 + 2;
                 
-                this.tx = 0; 
-                this.ty = 0; 
-                this.tz = 0;
-
-                this.baseSize = Math.random()*3 + 2; // Larger particles for better visibility
-                // Pink/Red/Purple hues with more variation
-                const hue = 320 + Math.random()*50; 
-                const lit = 55 + Math.random()*25;
-                this.hue = hue;
-                this.lit = lit;
+                const hue = 320 + Math.random() * 50;
+                const lit = 55 + Math.random() * 25;
                 this.col = `hsl(${hue}, 100%, ${lit}%)`;
             }
 
-            update(angle, angleX) {
-                // Smoothly move towards the target structure
-                this.x += (this.tx - this.x) * 0.06;
-                this.y += (this.ty - this.y) * 0.06;
-                this.z += (this.tz - this.z) * 0.06;
-
-                // 3D Rotation - Y axis (horizontal spin)
-                const cosY = Math.cos(angle);
-                const sinY = Math.sin(angle);
+            update(time) {
+                // Smooth spring physics to base position
+                const dx = this.baseX - this.x;
+                const dy = this.baseY - this.y;
                 
-                // 3D Rotation - X axis (vertical tilt) for more dynamic view
-                const cosX = Math.cos(angleX);
-                const sinX = Math.sin(angleX);
+                this.vx += dx * 0.02;
+                this.vy += dy * 0.02;
+                this.vx *= 0.9;
+                this.vy *= 0.9;
                 
-                // Apply Y rotation
-                let rotX = this.x * cosY - this.z * sinY;
-                let rotZ = this.x * sinY + this.z * cosY;
-                let rotY = this.y;
+                this.x += this.vx;
+                this.y += this.vy;
                 
-                // Apply X rotation
-                const finalY = rotY * cosX - rotZ * sinX;
-                const finalZ = rotY * sinX + rotZ * cosX;
-
-                // Enhanced perspective projection
-                const camZ = 600; 
-                const fov = 500; 
-                const scale = fov / (fov + camZ - finalZ);
-
-                this.px = canvas.width/2 + rotX * scale;
-                this.py = canvas.height*0.42 + finalY * scale;
-                this.ps = this.baseSize * scale * 1.2; // Slightly larger particles
-                this.depth = finalZ;
-                this.alpha = Math.max(0.3, Math.min(1, scale * 1.2)); // Better visibility
+                // Gentle wave motion
+                this.x += Math.sin(time * 0.001 + this.baseY * 0.01) * 0.5;
+                this.y += Math.cos(time * 0.0015 + this.baseX * 0.01) * 0.5;
             }
 
-            draw() {
-                if (this.ps < 0.5) return;
-                
-                ctx.globalAlpha = this.alpha;
+            draw(scale) {
+                ctx.globalAlpha = 0.85;
                 ctx.fillStyle = this.col;
                 ctx.beginPath();
-                ctx.arc(this.px, this.py, this.ps, 0, Math.PI*2);
+                ctx.arc(this.x, this.y, this.size * scale, 0, Math.PI * 2);
                 ctx.fill();
-                
                 ctx.globalAlpha = 1;
             }
         }
 
         function initParticles() {
             particles = [];
-            // 3D Heart formula - optimized particle count for smooth performance
-            const amount = 800; // Reduced for better performance
-            const scale = Math.min(canvas.width, canvas.height) * 0.15; 
+            const cx = canvas.width / 2;
+            const cy = canvas.height * 0.42;
+            const scale = Math.min(canvas.width, canvas.height) * 0.06;
             
-            let i = 0;
-            let attempts = 0;
-            while(i < amount && attempts < 50000) {
-                attempts++;
-                const x = (Math.random() * 3.2) - 1.6;
-                const y = (Math.random() * 3.2) - 1.6;
-                const z = (Math.random() * 3.2) - 1.6;
-
-                const a = x*x + (9/4)*y*y + z*z - 1;
-                // Heart volume check
-                if (a*a*a - x*x*z*z*z - (9/80)*y*y*z*z*z < 0) {
-                    const p = new Particle();
-                    p.tx = x * scale;
-                    p.ty = -y * scale; 
-                    p.tz = z * scale;
-                    particles.push(p);
-                    i++;
-                }
+            // Heart shape formula (2D parametric)
+            for (let i = 0; i < 400; i++) {
+                const t = (i / 400) * Math.PI * 2;
+                const x = 16 * Math.pow(Math.sin(t), 3);
+                const y = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+                particles.push(new Particle(cx + x * scale, cy + y * scale));
+            }
+            
+            // Add inner particles for fullness
+            for (let i = 0; i < 200; i++) {
+                const t = Math.random() * Math.PI * 2;
+                const r = Math.random() * 0.7;
+                const x = 16 * Math.pow(Math.sin(t), 3) * r;
+                const y = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t)) * r;
+                particles.push(new Particle(cx + x * scale, cy + y * scale));
             }
         }
 
-        let angle = 0;
-        let angleX = 0;
-        let frameCount = 0;
+        let startTime = Date.now();
         function animateParticles() {
-            // Clear canvas completely for best performance
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            // Smooth rotation with slight bounce
-            angle += 0.007; // Slower rotation for smoother feel 
-            angleX = Math.sin(angle * 0.5) * 0.15; // Gentle vertical tilt
-            
-            // Only sort every 5 frames to reduce CPU usage
-            frameCount++;
-            if (frameCount % 5 === 0) {
-                particles.sort((a, b) => (a.depth || 0) - (b.depth || 0));
-            }
+            const time = Date.now() - startTime;
+            const beat = 1 + Math.sin(time * 0.002) * 0.08;
             
             particles.forEach(p => {
-                p.update(angle, angleX);
-                p.draw();
-            });
+                p.update(time);
+                p.draw(beat);
 
             requestAnimationFrame(animateParticles);
         }
