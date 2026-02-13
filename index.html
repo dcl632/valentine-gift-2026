@@ -55,29 +55,7 @@
             overflow: hidden;
         }
 
-        /* ========== FLOATING HEARTS BG (global) ========== */
-        .hearts-bg {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            pointer-events: none;
-            z-index: 0;
-            overflow: hidden;
-        }
-
-        .floating-heart {
-            position: absolute;
-            bottom: -40px;
-            opacity: 0;
-            animation: floatUp linear infinite;
-        }
-
-        @keyframes floatUp {
-            0%   { transform: translateY(0) rotate(0deg) scale(0.5); opacity: 0; }
-            8%   { opacity: 0.5; }
-            85%  { opacity: 0.2; }
-            100% { transform: translateY(-110vh) rotate(360deg) scale(1); opacity: 0; }
-        }
+        /* Floating hearts removed for cleaner look */
 
         /* ========== PHASE 0: LOCK SCREEN ========== */
         #lockScreen {
@@ -115,19 +93,7 @@
             font-weight: 300;
         }
 
-        .lock-hearts-row {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 40px;
-            font-size: 16px;
-            animation: heartScroll 4s linear infinite;
-            white-space: nowrap;
-        }
-
-        @keyframes heartScroll {
-            0%   { transform: translateX(10%); }
-            100% { transform: translateX(-40%); }
-        }
+        /* Heart row removed */
 
         .gift-box-wrapper {
             display: flex;
@@ -630,16 +596,8 @@
 </head>
 <body>
 
-    <!-- Global floating hearts -->
-    <div class="hearts-bg" id="heartsBg"></div>
-
     <!-- ====== PHASE 0: LOCK SCREEN ====== -->
     <div id="lockScreen">
-        <div class="lock-hearts-row">
-            <span>💕</span><span>❤️</span><span>💗</span><span>💖</span>
-            <span>💕</span><span>❤️</span><span>💗</span><span>💖</span>
-            <span>💕</span><span>❤️</span><span>💗</span><span>💖</span>
-        </div>
         <div class="lock-time" id="lockTime">21:14</div>
         <div class="lock-date" id="lockDate">Thứ Sáu, 14 tháng 2</div>
         <div class="gift-box-wrapper" id="giftBoxWrapper">
@@ -829,22 +787,6 @@
         }
         updateClock();
         setInterval(updateClock, 1000);
-
-        // ===== FLOATING HEARTS =====
-        (function() {
-            const c = $('heartsBg');
-            const e = ['💕','❤️','💗','💖','🩷','✨'];
-            setInterval(() => {
-                const h = document.createElement('div');
-                h.className = 'floating-heart';
-                h.textContent = e[Math.floor(Math.random()*e.length)];
-                h.style.left = Math.random()*100 + '%';
-                h.style.fontSize = (Math.random()*14+10) + 'px';
-                h.style.animationDuration = (Math.random()*7+7) + 's';
-                c.appendChild(h);
-                setTimeout(() => h.remove(), 15000);
-            }, 1100);
-        })();
 
         // ===== HOLD TO OPEN =====
         function startHold() {
