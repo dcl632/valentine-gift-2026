@@ -973,7 +973,7 @@
                 this.ty = 0; 
                 this.tz = 0;
 
-                this.baseSize = Math.random()*2.5 + 1.5;
+                this.baseSize = Math.random()*3 + 2; // Larger particles for better visibility
                 // Pink/Red/Purple hues with more variation
                 const hue = 320 + Math.random()*50; 
                 const lit = 55 + Math.random()*25;
@@ -1020,40 +1020,25 @@
             draw() {
                 if (this.ps < 0.5) return;
                 
-                // Enhanced glow effect based on depth
-                const glowSize = 15 + (this.alpha * 10);
-                ctx.shadowBlur = glowSize;
-                ctx.shadowColor = `hsla(${this.hue}, 100%, ${this.lit}%, ${this.alpha * 0.8})`;
-                
                 ctx.globalAlpha = this.alpha;
+                ctx.fillStyle = this.col;
                 ctx.beginPath();
                 ctx.arc(this.px, this.py, this.ps, 0, Math.PI*2);
-                ctx.fillStyle = this.col;
                 ctx.fill();
                 
-                // Inner bright core
-                if (this.alpha > 0.6) {
-                    ctx.shadowBlur = 8;
-                    ctx.beginPath();
-                    ctx.arc(this.px, this.py, this.ps * 0.5, 0, Math.PI*2);
-                    ctx.fillStyle = `hsla(${this.hue}, 100%, 90%, ${this.alpha * 0.8})`;
-                    ctx.fill();
-                }
-                
                 ctx.globalAlpha = 1;
-                ctx.shadowBlur = 0;
             }
         }
 
         function initParticles() {
             particles = [];
-            // 3D Heart formula with denser sampling
-            const amount = 2000; // Much more particles for fuller look
+            // 3D Heart formula - optimized particle count for smooth performance
+            const amount = 800; // Reduced for better performance
             const scale = Math.min(canvas.width, canvas.height) * 0.15; 
             
             let i = 0;
             let attempts = 0;
-            while(i < amount && attempts < 80000) {
+            while(i < amount && attempts < 50000) {
                 attempts++;
                 const x = (Math.random() * 3.2) - 1.6;
                 const y = (Math.random() * 3.2) - 1.6;
@@ -1074,20 +1059,20 @@
 
         let angle = 0;
         let angleX = 0;
+        let frameCount = 0;
         function animateParticles() {
-            // Darker background for better glow effect
-            ctx.fillStyle = 'rgba(10, 10, 15, 0.3)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            // Clear canvas completely for best performance
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
             
             // Smooth rotation with slight bounce
-            angle += 0.008; 
+            angle += 0.007; // Slower rotation for smoother feel 
             angleX = Math.sin(angle * 0.5) * 0.15; // Gentle vertical tilt
             
-            // Heartbeat pulsing effect
-            const beat = 1 + Math.sin(Date.now()*0.002) * 0.08; 
-            
-            // Sort by depth for proper layering
-            particles.sort((a, b) => (a.depth || 0) - (b.depth || 0));
+            // Only sort every 5 frames to reduce CPU usage
+            frameCount++;
+            if (frameCount % 5 === 0) {
+                particles.sort((a, b) => (a.depth || 0) - (b.depth || 0));
+            }
             
             particles.forEach(p => {
                 p.update(angle, angleX);
