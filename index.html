@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Code of Love 💖</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Dancing+Script:wght@400;700&family=Noto+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --pink: #ff6b9d;
+            --deep-pink: #e84393;
+            --soft-pink: #fd79a8;
+            --purple: #a29bfe;
+            --dark: #0a0a0f;
+            --darker: #060608;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Noto Sans', sans-serif;
+            background: var(--darker);
+            color: #e0e0e0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* ========== SCROLLABLE MAIN ========== */
+        #mainScroll {
+            display: none;
+            width: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            scroll-snap-type: y proximity;
+        }
+
+        #mainScroll.show {
+            display: block;
+        }
+
+        .section {
+            min-height: 100vh;
+            min-height: 100dvh;
+            width: 100%;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            scroll-snap-align: start;
+            overflow: hidden;
+        }
+
+        /* ========== FLOATING HEARTS BG (global) ========== */
+        .hearts-bg {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .floating-heart {
+            position: absolute;
+            bottom: -40px;
+            opacity: 0;
+            animation: floatUp linear infinite;
+        }
+
+        @keyframes floatUp {
+            0%   { transform: translateY(0) rotate(0deg) scale(0.5); opacity: 0; }
+            8%   { opacity: 0.5; }
+            85%  { opacity: 0.2; }
+            100% { transform: translateY(-110vh) rotate(360deg) scale(1); opacity: 0; }
+        }
+
+        /* ========== PHASE 0: LOCK SCREEN ========== */
+        #lockScreen {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: linear-gradient(160deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        #lockScreen.hidden {
+            opacity: 0;
+            transform: scale(1.1);
+            pointer-events: none;
+        }
+
+        .lock-time {
+            font-size: clamp(64px, 16vw, 110px);
+            font-weight: 300;
+            letter-spacing: -3px;
+            color: #fff;
+            text-shadow: 0 0 50px rgba(255, 107, 157, 0.35);
+        }
+
+        .lock-date {
+            font-size: clamp(14px, 3vw, 17px);
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 4px;
+            margin-bottom: 55px;
+            font-weight: 300;
+        }
+
+        .lock-hearts-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 40px;
+            font-size: 16px;
+            animation: heartScroll 4s linear infinite;
+            white-space: nowrap;
+        }
+
+        @keyframes heartScroll {
+            0%   { transform: translateX(10%); }
+            100% { transform: translateX(-40%); }
+        }
+
+        .gift-box-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .gift-box {
+            font-size: 68px;
+            animation: giftBounce 2s ease-in-out infinite;
+            filter: drop-shadow(0 0 25px rgba(255, 107, 157, 0.5));
+            transition: transform 0.3s;
+        }
+
+        @keyframes giftBounce {
+            0%, 100% { transform: translateY(0) rotate(-3deg); }
+            50%      { transform: translateY(-14px) rotate(3deg); }
+        }
+
+        .hold-text {
+            margin-top: 16px;
+            font-size: 15px;
+            color: var(--pink);
+            font-weight: 400;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.45; }
+            50%      { opacity: 1; }
+        }
+
+        .hold-progress {
+            width: 180px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 2px;
+            margin-top: 14px;
+            overflow: hidden;
+        }
+
+        .hold-progress-fill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--pink), var(--purple));
+            border-radius: 2px;
+            transition: width 0.1s linear;
+        }
+
+        /* ========== PHASE 1: CODE EDITOR ========== */
+        #editorPhase {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 5000;
+            background: var(--darker);
+        }
+
+        #editorPhase.show {
+            display: flex;
+        }
+
+        #editorContainer {
+            width: 92%;
+            max-width: 660px;
+            background: #1e1e2e;
+            border-radius: 14px;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255,255,255,0.05);
+            overflow: hidden;
+            opacity: 0;
+            transition: opacity 0.8s ease;
+        }
+
+        #editorContainer.show { opacity: 1; }
+
+        #editorContainer.glitch-out {
+            animation: glitchOut 0.8s ease forwards;
+        }
+
+        @keyframes glitchOut {
+            0%   { transform: scale(1); filter: none; }
+            20%  { transform: skewX(5deg) scale(1); filter: hue-rotate(90deg); }
+            40%  { transform: skewX(-3deg) scale(1.02); filter: hue-rotate(180deg) brightness(1.5); }
+            60%  { transform: skewX(2deg) scale(0.98); filter: hue-rotate(270deg); }
+            80%  { transform: scale(1.05); filter: brightness(3) saturate(0); opacity: 0.5; }
+            100% { transform: scale(0); filter: brightness(5); opacity: 0; }
+        }
+
+        .editor-header {
+            background: #181825;
+            padding: 13px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .editor-dot { width: 12px; height: 12px; border-radius: 50%; }
+        .dot-red    { background: #f38ba8; }
+        .dot-yellow { background: #f9e2af; }
+        .dot-green  { background: #a6e3a1; }
+
+        .editor-title {
+            margin-left: 12px;
+            font-family: 'Fira Code', monospace;
+            font-size: 12px;
+            color: #585b70;
+        }
+
+        .editor-body {
+            padding: 18px 20px;
+            min-height: 260px;
+            background: #1e1e2e;
+            font-family: 'Fira Code', monospace;
+        }
+
+        .code-line {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 5px;
+            font-size: clamp(11.5px, 2.4vw, 14.5px);
+            line-height: 1.75;
+        }
+
+        .line-number { color: #45475a; user-select: none; min-width: 24px; text-align: right; }
+        .code-content { flex: 1; white-space: pre-wrap; word-break: break-word; }
+
+        .keyword  { color: #cba6f7; }
+        .variable { color: #89b4fa; }
+        .string   { color: #a6e3a1; }
+        .number   { color: #fab387; }
+        .comment  { color: #585b70; font-style: italic; }
+        .function { color: #f9e2af; }
+        .operator { color: #cdd6f4; }
+
+        .blinking-cursor {
+            display: inline-block;
+            width: 2px; height: 15px;
+            background: #cdd6f4;
+            animation: blink 1s step-end infinite;
+            vertical-align: text-bottom;
+            margin-left: 1px;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        .terminal {
+            background: #11111b;
+            padding: 12px 16px;
+            margin-top: 14px;
+            border-radius: 8px;
+            font-size: 11.5px;
+            font-family: 'Fira Code', monospace;
+            display: none;
+            border: 1px solid rgba(255,255,255,0.03);
+        }
+
+        .terminal.show { display: block; animation: fadeIn 0.3s ease; }
+        .terminal-line { margin-bottom: 5px; color: #a6adc8; }
+        .terminal-line .prompt { color: #a6e3a1; }
+        .progress-bar { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
+        .progress-fill { color: #94e2d5; }
+        .build-success { color: #a6e3a1; margin-top: 8px; display: flex; align-items: center; gap: 6px; }
+
+        /* ========== SECTION 1: HEART CANVAS ========== */
+        #heartSection {
+            background: radial-gradient(ellipse at center, #12101e 0%, var(--darker) 70%);
+        }
+
+        #canvas {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+        }
+
+        .scroll-hint {
+            position: absolute;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 13px;
+            color: rgba(255,255,255,0.35);
+            animation: bounceDown 2s ease-in-out infinite;
+            z-index: 10;
+            text-align: center;
+        }
+
+        .scroll-hint span {
+            display: block;
+            font-size: 20px;
+            margin-top: 4px;
+        }
+
+        @keyframes bounceDown {
+            0%, 100% { transform: translateX(-50%) translateY(0); opacity: 0.35; }
+            50%      { transform: translateX(-50%) translateY(8px); opacity: 0.7; }
+        }
+
+        /* ========== SECTION 2: PHOTO GALLERY ========== */
+        #photoSection {
+            background: linear-gradient(180deg, var(--darker) 0%, #110a1a 50%, var(--darker) 100%);
+            padding: 60px 0;
+            min-height: 100vh;
+            justify-content: flex-start;
+            padding-top: 10vh;
+        }
+
+        .gallery-title {
+            font-size: clamp(22px, 5vw, 32px);
+            font-weight: 300;
+            color: rgba(255,255,255,0.85);
+            margin-bottom: 8px;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .gallery-title.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .gallery-subtitle {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.4);
+            margin-bottom: 40px;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.8s ease 0.2s, transform 0.8s ease 0.2s;
+        }
+
+        .gallery-subtitle.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+            width: 88%;
+            max-width: 420px;
+            padding: 0 10px;
+        }
+
+        .photo-card {
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            transform: translateY(40px) scale(0.95);
+            transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+
+        .photo-card.show {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        .photo-card:nth-child(2) { transition-delay: 0.15s; }
+        .photo-card:nth-child(3) { transition-delay: 0.3s; }
+        .photo-card:nth-child(4) { transition-delay: 0.45s; }
+
+        .photo-card img {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            display: block;
+        }
+
+        .photo-card .caption {
+            padding: 10px 12px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.55);
+            text-align: center;
+        }
+
+        /* ========== SECTION 3: CHAT MESSAGE ========== */
+        #chatSection {
+            background: linear-gradient(180deg, var(--darker) 0%, #0d0a16 50%, var(--darker) 100%);
+            padding: 40px 0;
+            min-height: 100vh;
+            justify-content: center;
+        }
+
+        .chat-wrapper {
+            width: 90%;
+            max-width: 440px;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .chat-wrapper.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .chat-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            margin-bottom: 12px;
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .chat-avatar {
+            width: 42px; height: 42px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--pink), var(--purple));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 0 18px rgba(255, 107, 157, 0.25);
+            flex-shrink: 0;
+        }
+
+        .chat-name {
+            font-weight: 600;
+            font-size: 15px;
+            color: rgba(255,255,255,0.9);
+        }
+
+        .chat-status {
+            font-size: 11.5px;
+            color: #a6e3a1;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 1px;
+        }
+
+        .chat-status::before {
+            content: '';
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: #a6e3a1;
+        }
+
+        .chat-bubble {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 18px 18px 18px 6px;
+            border: 1px solid rgba(255,255,255,0.12);
+            padding: 14px 18px;
+            margin-bottom: 10px;
+            max-width: 88%;
+            font-size: 14.5px;
+            line-height: 1.6;
+            color: rgba(255,255,255,0.92);
+            opacity: 0;
+            transform: translateY(16px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+        }
+
+        .chat-bubble.show { opacity: 1; transform: translateY(0); }
+
+        .chat-bubble.sent {
+            background: linear-gradient(135deg, var(--deep-pink), var(--pink));
+            border-radius: 18px 18px 6px 18px;
+            margin-left: auto;
+            border: none;
+            color: #fff;
+        }
+
+        .chat-bubble .typing-dots {
+            display: inline-flex;
+            gap: 4px;
+            padding: 4px 0;
+        }
+
+        .chat-bubble .typing-dots span {
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.45);
+            animation: dotBounce 1.4s ease-in-out infinite;
+        }
+
+        .chat-bubble .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .chat-bubble .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes dotBounce {
+            0%, 60%, 100% { transform: translateY(0); }
+            30%            { transform: translateY(-7px); }
+        }
+
+        .chat-time {
+            font-size: 10.5px;
+            color: rgba(255,255,255,0.45);
+            margin-top: 4px;
+        }
+
+        .love-text {
+            font-weight: 500;
+            font-size: 15px;
+            line-height: 1.65;
+        }
+
+        .love-text-zh {
+            font-family: 'Dancing Script', cursive;
+            font-size: clamp(22px, 5.5vw, 30px);
+            line-height: 1.4;
+        }
+
+        /* ========== SECTION 4: FINAL ========== */
+        #finalSection {
+            background: radial-gradient(ellipse at 50% 40%, #1a0f2e 0%, var(--darker) 70%);
+            min-height: 60vh;
+            justify-content: center;
+        }
+
+        .final-message {
+            text-align: center;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 1s ease, transform 1s ease;
+        }
+
+        .final-message.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .final-big-heart {
+            font-size: 60px;
+            animation: heartBeat 1.5s infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes heartBeat {
+            0%, 100% { transform: scale(1); }
+            15%      { transform: scale(1.15); }
+            30%      { transform: scale(1); }
+        }
+
+        .final-line {
+            font-size: clamp(14px, 3.5vw, 18px);
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 300;
+            line-height: 1.8;
+            padding: 0 30px;
+        }
+
+        .final-line strong {
+            color: var(--pink);
+            font-weight: 500;
+        }
+
+        .footer-text {
+            margin-top: 40px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.3);
+            text-align: center;
+        }
+
+        /* ========== CONFETTI ========== */
+        .confetti {
+            position: fixed;
+            top: -15px;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* ========== UTILITY ========== */
+        @keyframes fadeIn {
+            from { opacity: 0; } to { opacity: 1; }
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 500px) {
+            .gift-box { font-size: 55px; }
+            .photo-grid { gap: 10px; width: 92%; }
+            .photo-card .caption { padding: 8px 10px; font-size: 11px; }
+            .chat-bubble { padding: 12px 15px; font-size: 13.5px; }
+            .love-text { font-size: 14px; }
+            .love-text-zh { font-size: 20px; }
+            .gallery-title { font-size: 22px; }
+            .final-big-heart { font-size: 48px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Global floating hearts -->
+    <div class="hearts-bg" id="heartsBg"></div>
+
+    <!-- ====== PHASE 0: LOCK SCREEN ====== -->
+    <div id="lockScreen">
+        <div class="lock-hearts-row">
+            <span>💕</span><span>❤️</span><span>💗</span><span>💖</span>
+            <span>💕</span><span>❤️</span><span>💗</span><span>💖</span>
+            <span>💕</span><span>❤️</span><span>💗</span><span>💖</span>
+        </div>
+        <div class="lock-time" id="lockTime">21:14</div>
+        <div class="lock-date" id="lockDate">Thứ Sáu, 14 tháng 2</div>
+        <div class="gift-box-wrapper" id="giftBoxWrapper">
+            <div class="gift-box" id="giftBox">🎁</div>
+            <div class="hold-text">長按開啟禮物 💝</div>
+            <div class="hold-progress">
+                <div class="hold-progress-fill" id="holdFill"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== PHASE 1: CODE EDITOR (floating overlay) ====== -->
+    <div id="editorPhase">
+        <div id="editorContainer">
+            <div class="editor-header">
+                <div class="editor-dot dot-red"></div>
+                <div class="editor-dot dot-yellow"></div>
+                <div class="editor-dot dot-green"></div>
+                <div class="editor-title">love_algorithm.js — Code of Love</div>
+            </div>
+            <div class="editor-body">
+                <div id="codeOutput"></div>
+                <div class="terminal" id="terminal">
+                    <div class="terminal-line"><span class="prompt">❯</span> npm run build:love</div>
+                    <div class="terminal-line">正在編譯戀愛演算法...</div>
+                    <div class="progress-bar">
+                        <span>[<span class="progress-fill" id="progressFill"></span>]</span>
+                        <span id="progressPercent" style="color:#94e2d5">0%</span>
+                    </div>
+                    <div class="build-success" id="buildSuccess" style="display:none;">
+                        <span>✓</span> 建置成功 — 準備進入妳的心...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== SCROLLABLE SECTIONS ====== -->
+    <div id="mainScroll">
+
+        <!-- SECTION 1: Particle Heart -->
+        <section class="section" id="heartSection">
+            <canvas id="canvas"></canvas>
+            <div class="scroll-hint" id="scrollHint">
+                向下滑動
+                <span>↓</span>
+            </div>
+        </section>
+
+        <!-- SECTION 2: Photo Gallery -->
+        <section class="section" id="photoSection">
+            <div class="gallery-title" id="galleryTitle">Our Memories 💕</div>
+            <div class="gallery-subtitle" id="gallerySubtitle">每一刻都值得珍藏</div>
+            <div class="photo-grid" id="photoGrid">
+                <!-- ★ REPLACE src with your actual photo URLs ★ -->
+                <div class="photo-card">
+                    <img src="https://via.placeholder.com/300/ff6b9d/ffffff?text=Us+1" alt="Memory 1">
+                    <div class="caption">第一次見面 ✨</div>
+                </div>
+                <div class="photo-card">
+                    <img src="https://via.placeholder.com/300/c44569/ffffff?text=Us+2" alt="Memory 2">
+                    <div class="caption">那天的笑容 💫</div>
+                </div>
+                <div class="photo-card">
+                    <img src="https://via.placeholder.com/300/f8b500/ffffff?text=Us+3" alt="Memory 3">
+                    <div class="caption">在一起的時光 🌸</div>
+                </div>
+                <div class="photo-card">
+                    <img src="https://via.placeholder.com/300/a29bfe/ffffff?text=Us+4" alt="Memory 4">
+                    <div class="caption">永遠記得你 💖</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: Chat Messages -->
+        <section class="section" id="chatSection">
+            <div class="chat-wrapper" id="chatWrapper">
+                <div class="chat-header">
+                    <div class="chat-avatar">💻</div>
+                    <div>
+                        <div class="chat-name">Code of Love</div>
+                        <div class="chat-status">Đang hoạt động</div>
+                    </div>
+                </div>
+                <div id="chatMessages"></div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: Final -->
+        <section class="section" id="finalSection">
+            <div class="final-message" id="finalMessage">
+                <div class="final-big-heart">❤️</div>
+                <div class="final-line">
+                    Happy Valentine's Day<br>
+                    <strong>親愛的</strong>，我愛妳直到永遠
+                </div>
+                <div class="footer-text">
+                    Made with ❤️ by 廖鼎超 · Valentine 2026
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Audio -->
+    <audio id="bgMusic" loop>
+        <!-- ★ REPLACE with your romantic music URL ★ -->
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+    (function() {
+        'use strict';
+
+        // ===== CODE =====
+        const code = [
+            { line: 1, tokens: [
+                { type:'keyword',text:'const' },{ type:'variable',text:' myWorld' },
+                { type:'operator',text:' = ' },{ type:'keyword',text:'new' },
+                { type:'function',text:' Life' },{ type:'operator',text:'();' }
+            ]},
+            { line: 2, tokens: [
+                { type:'keyword',text:'const' },{ type:'variable',text:' you' },
+                { type:'operator',text:' = ' },{ type:'string',text:'"妳"' },
+                { type:'operator',text:';' },{ type:'comment',text:' // 我的幸福' }
+            ]},
+            { line: 3, tokens: [] },
+            { line: 4, tokens: [
+                { type:'keyword',text:'while' },{ type:'operator',text:' (' },
+                { type:'variable',text:'alive' },{ type:'operator',text:') {' }
+            ]},
+            { line: 5, tokens: [
+                { type:'operator',text:'  ' },{ type:'variable',text:'myWorld' },
+                { type:'operator',text:'.' },{ type:'function',text:'orbit' },
+                { type:'operator',text:'(' },{ type:'variable',text:'you' },
+                { type:'operator',text:');' }
+            ]},
+            { line: 6, tokens: [
+                { type:'operator',text:'  ' },{ type:'keyword',text:'if' },
+                { type:'operator',text:' (' },{ type:'function',text:'near' },
+                { type:'operator',text:'(' },{ type:'variable',text:'you' },
+                { type:'operator',text:')) {' }
+            ]},
+            { line: 7, tokens: [
+                { type:'operator',text:'     ' },{ type:'variable',text:'heartRate' },
+                { type:'operator',text:' += ' },{ type:'number',text:'1000' },
+                { type:'operator',text:';' }
+            ]},
+            { line: 8, tokens: [{ type:'operator',text:'  }' }] },
+            { line: 9, tokens: [{ type:'operator',text:'}' }] },
+            { line: 10, tokens: [{ type:'comment',text:'// 正在編譯愛意...' }] }
+        ];
+
+        const chatSequence = [
+            { type:'received', text:'建置完成 ✓' },
+            { type:'received', text:'初始化愛心模組... 💗' },
+            { type:'received', text:'❤️ 愛心已部署！' },
+            { type:'sent', text:'這是我親手為妳寫的程式，專屬於妳 ❤️', isLove:true, lang:'zh' },
+            { type:'sent', text:'妳是我世界的中心 💕', isLove:true, lang:'zh' },
+        ];
+
+        // ===== DOM =====
+        const $ = id => document.getElementById(id);
+        const lockScreen = $('lockScreen');
+        const holdFill = $('holdFill');
+        const editorPhase = $('editorPhase');
+        const editorContainer = $('editorContainer');
+        const codeOutput = $('codeOutput');
+        const terminal = $('terminal');
+        const mainScroll = $('mainScroll');
+        const canvas = $('canvas');
+        const ctx = canvas.getContext('2d');
+        const chatWrapper = $('chatWrapper');
+        const chatMessages = $('chatMessages');
+        const bgMusic = $('bgMusic');
+
+        let hasStarted = false;
+        let holdTimer = null;
+        let holdProgress = 0;
+
+        // ===== CLOCK =====
+        function updateClock() {
+            const n = new Date();
+            $('lockTime').textContent = String(n.getHours()).padStart(2,'0') + ':' + String(n.getMinutes()).padStart(2,'0');
+            const d = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
+            $('lockDate').textContent = `${d[n.getDay()]}, ${n.getMonth()+1}月${n.getDate()}日`;
+        }
+        updateClock();
+        setInterval(updateClock, 1000);
+
+        // ===== FLOATING HEARTS =====
+        (function() {
+            const c = $('heartsBg');
+            const e = ['💕','❤️','💗','💖','🩷','✨'];
+            setInterval(() => {
+                const h = document.createElement('div');
+                h.className = 'floating-heart';
+                h.textContent = e[Math.floor(Math.random()*e.length)];
+                h.style.left = Math.random()*100 + '%';
+                h.style.fontSize = (Math.random()*14+10) + 'px';
+                h.style.animationDuration = (Math.random()*7+7) + 's';
+                c.appendChild(h);
+                setTimeout(() => h.remove(), 15000);
+            }, 1100);
+        })();
+
+        // ===== HOLD TO OPEN =====
+        function startHold() {
+            if (hasStarted) return;
+            holdProgress = 0;
+            holdTimer = setInterval(() => {
+                holdProgress += 2;
+                holdFill.style.width = Math.min(holdProgress, 100) + '%';
+                if (holdProgress >= 100) {
+                    clearInterval(holdTimer); holdTimer = null;
+                    hasStarted = true;
+                    openGift();
+                }
+            }, 30);
+        }
+        function cancelHold() {
+            if (holdTimer) { clearInterval(holdTimer); holdTimer = null; }
+            if (!hasStarted) { holdProgress = 0; holdFill.style.width = '0%'; }
+        }
+
+        const gbw = $('giftBoxWrapper');
+        gbw.addEventListener('mousedown', startHold);
+        gbw.addEventListener('mouseup', cancelHold);
+        gbw.addEventListener('mouseleave', cancelHold);
+        gbw.addEventListener('touchstart', e => { e.preventDefault(); startHold(); }, { passive:false });
+        gbw.addEventListener('touchend', cancelHold);
+        gbw.addEventListener('touchcancel', cancelHold);
+
+        // ===== OPEN GIFT =====
+        function openGift() {
+            bgMusic.volume = 0.35;
+            bgMusic.play().catch(() => {});
+            $('giftBox').style.transition = 'transform 0.5s ease';
+            $('giftBox').style.transform = 'scale(2) rotate(20deg)';
+            createConfetti(35);
+            setTimeout(() => {
+                lockScreen.classList.add('hidden');
+                setTimeout(() => {
+                    lockScreen.style.display = 'none';
+                    startPhase1();
+                }, 800);
+            }, 500);
+        }
+
+        // ===== PHASE 1: CODE EDITOR =====
+        function startPhase1() {
+            editorPhase.classList.add('show');
+            setTimeout(() => editorContainer.classList.add('show'), 100);
+
+            let li = 0;
+            function typeLine() {
+                if (li >= code.length) {
+                    terminal.classList.add('show');
+                    animateProgress().then(() => setTimeout(startPhase2, 1000));
+                    return;
+                }
+                const line = code[li];
+                const div = document.createElement('div');
+                div.className = 'code-line';
+                const num = document.createElement('span');
+                num.className = 'line-number';
+                num.textContent = line.line;
+                const content = document.createElement('span');
+                content.className = 'code-content';
+                div.appendChild(num);
+                div.appendChild(content);
+                codeOutput.appendChild(div);
+
+                if (!line.tokens.length) { li++; setTimeout(typeLine, 80); return; }
+
+                let ti = 0;
+                function nextTok() {
+                    if (ti >= line.tokens.length) { rmCur(); li++; setTimeout(typeLine, 100); return; }
+                    const tok = line.tokens[ti];
+                    const sp = document.createElement('span');
+                    sp.className = tok.type;
+                    content.appendChild(sp);
+                    let ci = 0;
+                    function nextCh() {
+                        rmCur();
+                        if (ci >= tok.text.length) { ti++; nextTok(); return; }
+                        sp.textContent += tok.text[ci++];
+                        const cur = document.createElement('span');
+                        cur.className = 'blinking-cursor';
+                        content.appendChild(cur);
+                        setTimeout(nextCh, 20 + Math.random() * 20);
+                    }
+                    nextCh();
+                }
+                nextTok();
+            }
+            function rmCur() { const c = codeOutput.querySelector('.blinking-cursor'); if(c) c.remove(); }
+            setTimeout(typeLine, 350);
+        }
+
+        function animateProgress() {
+            const fill = $('progressFill'), pct = $('progressPercent'), ok = $('buildSuccess');
+            let p = 0;
+            return new Promise(res => {
+                const iv = setInterval(() => {
+                    p += 2;
+                    fill.textContent = '█'.repeat(Math.floor(p/10)) + '░'.repeat(10 - Math.floor(p/10));
+                    pct.textContent = p + '%';
+                    if (p >= 100) { clearInterval(iv); ok.style.display = 'flex'; res(); }
+                }, 40);
+            });
+        }
+
+        // ===== PHASE 2: GLITCH → SCROLL SECTIONS =====
+        function startPhase2() {
+            editorContainer.classList.add('glitch-out');
+            setTimeout(() => {
+                editorPhase.style.display = 'none';
+                mainScroll.classList.add('show');
+                resizeCanvas();
+                initParticles();
+                animateParticles();
+                setupScrollObservers();
+            }, 850);
+        }
+
+        // ===== SCROLL-TRIGGERED ANIMATIONS =====
+        function setupScrollObservers() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (!entry.isIntersecting) return;
+                    const id = entry.target.id;
+
+                    if (id === 'photoSection') {
+                        $('galleryTitle').classList.add('show');
+                        $('gallerySubtitle').classList.add('show');
+                        document.querySelectorAll('.photo-card').forEach(c => c.classList.add('show'));
+                    }
+
+                    if (id === 'chatSection' && !chatWrapper.classList.contains('show')) {
+                        chatWrapper.classList.add('show');
+                        setTimeout(startChatSequence, 600);
+                    }
+
+                    if (id === 'finalSection') {
+                        $('finalMessage').classList.add('show');
+                        createConfetti(100);
+                    }
+                });
+            }, { threshold: 0.3 });
+
+            observer.observe($('photoSection'));
+            observer.observe($('chatSection'));
+            observer.observe($('finalSection'));
+        }
+
+        // ===== PARTICLE SYSTEM =====
+        let particles = [];
+        let mouse = { x: -9999, y: -9999 };
+
+        function resizeCanvas() {
+            const section = $('heartSection');
+            canvas.width = section.clientWidth;
+            canvas.height = section.clientHeight;
+        }
+        window.addEventListener('resize', () => { resizeCanvas(); if (particles.length) initParticles(); });
+
+        canvas.addEventListener('mousemove', e => {
+            const r = canvas.getBoundingClientRect();
+            mouse.x = e.clientX - r.left;
+            mouse.y = e.clientY - r.top;
+        });
+        canvas.addEventListener('mouseleave', () => { mouse.x = mouse.y = -9999; });
+        canvas.addEventListener('touchmove', e => {
+            e.preventDefault();
+            const r = canvas.getBoundingClientRect();
+            mouse.x = e.touches[0].clientX - r.left;
+            mouse.y = e.touches[0].clientY - r.top;
+        }, { passive: false });
+        canvas.addEventListener('touchend', () => { mouse.x = mouse.y = -9999; });
+
+        class Particle {
+            constructor() {
+                this.x = (Math.random()-0.5) * canvas.width;
+                this.y = (Math.random()-0.5) * canvas.height;
+                this.z = (Math.random()-0.5) * 500;
+                
+                this.tx = 0; 
+                this.ty = 0; 
+                this.tz = 0;
+
+                this.sz = Math.random()*2 + 1;
+                // Pink/Red/Purple hues
+                const hue = 310 + Math.random()*50; 
+                const lit = 50 + Math.random()*20;
+                this.col = `hsl(${hue}, 100%, ${lit}%)`;
+            }
+
+            update(angle) {
+                // Smoothly move towards the target structure
+                this.x += (this.tx - this.x) * 0.05;
+                this.y += (this.ty - this.y) * 0.05;
+                this.z += (this.tz - this.z) * 0.05;
+
+                // 3D Rotation around Y axis
+                const cos = Math.cos(angle);
+                const sin = Math.sin(angle);
+                
+                // Standard rotation matrix for Y
+                const rotX = this.x * cos - this.z * sin;
+                const rotZ = this.x * sin + this.z * cos;
+
+                // Perspective projection
+                const camZ = 500; // Camera distance
+                const fov = 400; // Field of view
+                const scale = fov / (fov + camZ - rotZ); // Calculate scale based on depth
+
+                this.px = canvas.width/2 + rotX * scale;
+                this.py = canvas.height*0.42 + this.y * scale;
+                this.ps = this.sz * scale;
+                this.alpha = scale; // Fade out further particles
+            }
+
+            draw() {
+                if (this.ps < 0) return;
+                ctx.beginPath();
+                ctx.arc(this.px, this.py, Math.max(0, this.ps), 0, Math.PI*2);
+                ctx.fillStyle = this.col;
+                // Simple depth sorting alpha
+                ctx.globalAlpha = Math.min(1, Math.max(0.2, this.alpha)); 
+                ctx.fill();
+                ctx.globalAlpha = 1;
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            // Use rejection sampling for a 3D Volumetric Heart
+            // Formula: (x^2 + 9/4y^2 + z^2 - 1)^3 - x^2z^3 - 9/80y^2z^3 < 0
+            const amount = 1200; // Increased particle count for 3D volume
+            const scale = Math.min(canvas.width, canvas.height) * 0.14; 
+            
+            let i = 0;
+            let attempts = 0;
+            while(i < amount && attempts < 50000) {
+                attempts++;
+                const x = (Math.random() * 3) - 1.5;
+                const y = (Math.random() * 3) - 1.5;
+                const z = (Math.random() * 3) - 1.5;
+
+                const a = x*x + (9/4)*y*y + z*z - 1;
+                // Check if point is inside the heart volume
+                if (a*a*a - x*x*z*z*z - (9/80)*y*y*z*z*z < 0) {
+                    const p = new Particle();
+                    // y is inverted in canvas
+                    p.tx = x * scale;
+                    p.ty = -y * scale; 
+                    p.tz = z * scale;
+                    particles.push(p);
+                    i++;
+                }
+            }
+        }
+
+        let angle = 0;
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Continuous rotation
+            angle += 0.01; 
+            
+            // Adding a small heartbeat scale effect
+            const beat = 1 + Math.sin(Date.now()*0.003) * 0.05; 
+            
+            // Sort particles by depth (painter's algorithm) roughly by recalculating Z?
+            // For simple particles, standard draw order is okay, or we can just iterate.
+            // But for true 3D opacity, sorting is better. 
+            // We'll skip sorting for performance as it's a cloud of dots.
+
+            particles.forEach(p => {
+                // Apply beat to target positions temporarily ?
+                // Simpler: assume target is scaled. 
+                // Let's just modify the update to handle global scale if needed
+                // For now, static size heart rotating is elegant.
+                p.update(angle);
+                p.draw();
+            });
+
+            requestAnimationFrame(animateParticles);
+        }
+
+        // ===== CHAT SEQUENCE =====
+        function startChatSequence() {
+            let idx = 0;
+            function next() {
+                if (idx >= chatSequence.length) return;
+                const msg = chatSequence[idx];
+
+                const bubble = document.createElement('div');
+                bubble.className = 'chat-bubble' + (msg.type === 'sent' ? ' sent' : '');
+                bubble.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
+                chatMessages.appendChild(bubble);
+                requestAnimationFrame(() => bubble.classList.add('show'));
+
+                setTimeout(() => {
+                    if (msg.isLove) {
+                        const cls = msg.lang === 'zh' ? 'love-text love-text-zh' : 'love-text';
+                        bubble.innerHTML = `<div class="${cls}">${msg.text}</div>`;
+                    } else {
+                        bubble.innerHTML = msg.text;
+                    }
+                    const t = document.createElement('div');
+                    t.className = 'chat-time';
+                    const n = new Date();
+                    t.textContent = String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
+                    bubble.appendChild(t);
+
+                    idx++;
+                    setTimeout(next, 700);
+                }, 1100);
+            }
+            next();
+        }
+
+        // ===== CONFETTI =====
+        function createConfetti(count) {
+            const cols = ['#ff6b9d','#e84393','#f8b500','#a29bfe','#fd79a8','#ff4757','#ffa502'];
+            for (let i = 0; i < count; i++) {
+                setTimeout(() => {
+                    const el = document.createElement('div');
+                    el.className = 'confetti';
+                    el.style.left = Math.random()*100 + '%';
+                    el.style.width = (Math.random()*10+5) + 'px';
+                    el.style.height = (Math.random()*10+5) + 'px';
+                    el.style.background = cols[Math.floor(Math.random()*cols.length)];
+                    el.style.borderRadius = Math.random()>0.5?'50%':'2px';
+                    document.body.appendChild(el);
+                    const xD = (Math.random()-0.5)*300, spin = Math.random()*720-360;
+                    const dur = (Math.random()*2.5+2)*1000;
+                    el.animate([
+                        { transform:'translateY(0) translateX(0) rotate(0) scale(0)', opacity:0 },
+                        { opacity:1, offset:0.1 },
+                        { transform:`translateY(${innerHeight+30}px) translateX(${xD}px) rotate(${spin}deg) scale(0.3)`, opacity:0 }
+                    ], { duration:dur, easing:'cubic-bezier(.25,.46,.45,.94)' }).onfinish = () => el.remove();
+                }, i*25);
+            }
+        }
+
+    })();
+    </script>
+</body>
+</html>
