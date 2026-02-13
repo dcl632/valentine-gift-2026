@@ -1183,6 +1183,32 @@
             }
 
             ctx.globalAlpha = 1;
+
+            // ---- "鼎超與明英" TEXT below heart ----
+            if (eased > 0.5) {
+                const textAlpha = Math.min(1, (eased - 0.5) * 2);
+                const textBeat = beat;
+                const fontSize = Math.min(canvas.width, canvas.height) * 0.055;
+                ctx.save();
+                ctx.font = `600 ${fontSize}px 'Noto Sans', sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'top';
+                // Glow
+                ctx.globalAlpha = textAlpha * 0.4;
+                ctx.fillStyle = '#ff6b9d';
+                const textY = cy + Math.min(canvas.width, canvas.height) * 0.28 * textBeat;
+                ctx.fillText('鼎超與明英', cx, textY);
+                // Main text with gradient
+                ctx.globalAlpha = textAlpha;
+                const grad = ctx.createLinearGradient(cx - 80, textY, cx + 80, textY);
+                grad.addColorStop(0, '#ff6b9d');
+                grad.addColorStop(0.5, '#fd79a8');
+                grad.addColorStop(1, '#e84393');
+                ctx.fillStyle = grad;
+                ctx.fillText('鼎超與明英', cx, textY);
+                ctx.restore();
+            }
+
             requestAnimationFrame(animateParticles);
         }
 
